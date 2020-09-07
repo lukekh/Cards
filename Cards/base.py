@@ -1,3 +1,6 @@
+import random
+
+
 class Card:
     def __init__(self, pip, suit, display_pip="letter", display_suit="unicode"):
         """
@@ -174,3 +177,40 @@ class Hand:
 
     def __bool__(self):
         return bool(self.cards)
+
+
+class Deck:
+    def __init__(self, cards=None, decks=1, shuffled=True):
+        if cards is None:
+            self.Cards = [Card(pip, suit) for pip in range(2, 14) for suit in ('S', 'H', 'D', 'C')] * decks
+        else:
+            self.cards = cards * decks
+
+        if shuffled:
+            random.shuffle(self.cards)
+
+    def __len__(self):
+        return len(self.cards)
+
+    def __add__(self, other):
+        try:
+            return Deck(cards=self.cards + other.cards)
+        except TypeError:
+            raise TypeError(f'can only concatenate Deck (not "{type(other).__name__}" to '
+                            f'{type(self).__name__}')
+
+    def __mul__(self, other):
+        return Deck(cards=self.cards * other)
+
+    def __getitem__(self, item):
+        return self.cards[item]
+
+    def __delitem__(self, key):
+        del self.cards[key]
+
+    def shuffle(self):
+        random.shuffle(self.cards)
+
+    def deal(self, *hands, cards=2, burn=False):
+        # TODO: Write this method
+        pass
