@@ -96,15 +96,15 @@ class Card:
 
     def __le__(self, other):
         if isinstance(other, Card):
-            return self.pip < other.pip
-        else:
-            return self.pip < other
-
-    def __lt__(self, other):
-        if isinstance(other, Card):
             return self.pip <= other.pip
         else:
             return self.pip <= other
+
+    def __lt__(self, other):
+        if isinstance(other, Card):
+            return self.pip < other.pip
+        else:
+            return self.pip < other
 
     def __hash__(self):
         return hash((self.pip, self.suit, type(self).__name__))
@@ -112,11 +112,13 @@ class Card:
 
 # A class that simulates a hand of cards. Kept general to be used as a parent class for specific games.
 class Hand:
+    """
+    A hand of cards.
+
+    This class takes in Card arguments and stores them as a list
+    :param args: Card; the Cards that constitute the Hand
+    """
     def __init__(self, *args):
-        """
-        This class takes in Card arguments and stores them as a list
-        :param args: Card; the Cards that constitute the Hand
-        """
         self.cards = [card for card in args if isinstance(card, Card)]
         self.s_map = {'spade': 0, 'spades': 0, 's': 0, u'\u2660': 0, 0: 0, '0': 0,
                       'heart': 1, 'hearts': 1, 'h': 1, u'\u2661': 1, 1: 1, '1': 1,
@@ -180,7 +182,17 @@ class Hand:
 
 
 class Deck:
-    def __init__(self, cards=None, decks=1, shuffled=True):
+    """
+    A deck of cards.
+
+    This is a standard 52 cards deck. Jokers not included.
+    Use kwarg card to make your own custom deck.
+
+    :param cards: list; a list of cards to form a custom deck - if None, will generate a standard deck
+    :param decks: int; the number of decks
+    :param shuffled: bool; whether or not you want the deck shuffled
+    """
+    def __init__(self, cards:list = None, decks:int = 1, shuffled:bool = True):
         if cards is None:
             self.Cards = [Card(pip, suit) for pip in range(2, 14) for suit in ('S', 'H', 'D', 'C')] * decks
         else:
