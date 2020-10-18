@@ -78,12 +78,67 @@ class Dealer:
 
 class Table:
     """
-    A blackjack table.
+    A blackjack table with a single player and a dealer.
 
     :param decks: int; the number of decks
+    :param chips: int; the number of chips the player has for betting
     """
-    def __init__(self, decks: int = 6):
+    def __init__(self, decks: int = 6, chips: int = 100):
         self.dealer = Dealer()
         self.shoe = Cards.Deck(decks=decks, shuffled=True)
+        self.discards = Cards.Deck(cards=[])
+        self.player = Hand()
+        self.chips = chips
+
+    def deal(self):
+        """
+        Initial deal.
+        """
+        # First, burn a card
+        self.shoe.deal(cards=0, burn=True)
+        # Deal to the player first, then the dealer
+        self.shoe.deal(self.player, self.dealer, cards=2, discards=self.discards)
+
+    def round(self):
+        pass
+
+    def end_hand(self):
+        """
+        Clean up cards at the end of a hand.
+        """
+        self.discards += self.dealer + self.player
+        self.dealer = Hand()
+        self.player = Hand()
 
 
+def options(hand: Hand):
+    """
+    Find the options a player has given a blackjack hand.
+
+    :param hand: Hand; the hand a player is considering
+    :return: dictionary containing options
+    """
+    # Initialise dictionary
+    # The player can always stand
+    options_dict = {'stand': True}
+
+    # Can the player hit?
+    if hand.value() > 21:
+        options_dict['hit'] = False
+    else:
+        options_dict['hit'] = True
+
+    # Can the player split?
+    # Check player has only their first two cards and both have the same value
+    if (len(hand) == 2) and (set([card.value() for card in hand]) == 1):
+        options_dict['split'] = True
+    else:
+        options_dict['split'] = False
+
+    #return options
+    return options_dict
+
+
+
+if __name__ == "__main__":
+    pass

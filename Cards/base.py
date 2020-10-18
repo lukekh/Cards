@@ -223,6 +223,6 @@ class Deck:
     def shuffle(self):
         random.shuffle(self.cards)
 
-    def deal(self, *hands, cards=2, burn=False):
+    def deal(self, *hands, cards=1, burn=False, discards=None):
         # TODO: Write this method
         pass
