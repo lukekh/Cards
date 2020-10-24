@@ -1,5 +1,23 @@
 import random
 
+# Global variables
+s_map = {
+    'spade': 0, 'spades': 0, 's': 0, u'\u2660': 0, 0: 0, '0': 0,
+    'heart': 1, 'hearts': 1, 'h': 1, u'\u2661': 1, 1: 1, '1': 1,
+    'diamond': 2, 'diamonds': 2, 'd': 2, u'\u2662': 2, 2: 2, '2': 2,
+    'club': 3, 'clubs': 3, 'c': 3, u'\u2663': 3, 3: 3, '3': 3
+}
+p_map = {
+    **dict(zip(range(2, 15), range(2, 15))),
+    **dict(zip([str(i) for i in range(2, 15)], range(2, 15))),
+    **{
+        'j': 11, 'jack': 11,
+        'q': 12, 'queen': 12,
+        'k': 13, 'king': 13,
+        'a': 14, 'ace': 14, 1: 14, '1': 14  # This bit means Aces are high
+    }
+}
+
 
 class Card:
     def __init__(self, pip, suit, display_pip="letter", display_suit="unicode"):
@@ -14,18 +32,6 @@ class Card:
         :param display_pip: str; default="letter"; user setting for default repr and str of pip value
         :param display_suit: str; default="unicode"; user setting for default repr and str of suit value
         """
-
-        # maps
-        p_map = {'j': 11, 'jack': 11,
-                 'q': 12, 'queen': 12,
-                 'k': 13, 'king': 13,
-                 'a': 14, 'ace': 14, 1: 14, '1': 14}
-        s_map = {'spade': 0, 'spades': 0, 's': 0, u'\u2660': 0,
-                 'heart': 1, 'hearts': 1, 'h': 1, u'\u2661': 1,
-                 'diamond': 2, 'diamonds': 2, 'd': 2, u'\u2662': 2,
-                 'club': 3, 'clubs': 3, 'c': 3, u'\u2663': 3
-                 }
-
         if str(pip).lower() in p_map:
             self.pip = p_map[str(pip).lower()]
         else:
@@ -120,16 +126,6 @@ class Hand:
     """
     def __init__(self, *args):
         self.cards = [card for card in args if isinstance(card, Card)]
-        self.s_map = {'spade': 0, 'spades': 0, 's': 0, u'\u2660': 0, 0: 0, '0': 0,
-                      'heart': 1, 'hearts': 1, 'h': 1, u'\u2661': 1, 1: 1, '1': 1,
-                      'diamond': 2, 'diamonds': 2, 'd': 2, u'\u2662': 2, 2: 2, '2': 2,
-                      'club': 3, 'clubs': 3, 'c': 3, u'\u2663': 3, 3: 3, '3': 3}
-        self.p_map = {**dict(zip(range(2, 15), range(2, 15))),
-                      **dict(zip([str(i) for i in range(2, 15)], range(2, 15))),
-                      **{'j': 11, 'jack': 11,
-                         'q': 12, 'queen': 12,
-                         'k': 13, 'king': 13,
-                         'a': 14, 'ace': 14, 1: 14, '1': 14}}  # This bit means Aces are high and low
 
     def __repr__(self):
         return str(self)
@@ -154,10 +150,10 @@ class Hand:
             return self.cards.__getitem__(item)
 
     def suit(self, suit):
-        return self.subset(*[card for card in self if card.suit == self.s_map[suit]])
+        return self.subset(*[card for card in self if card.suit == s_map[suit]])
 
     def pip(self, pip):
-        return self.subset(*[card for card in self if card.pip == self.p_map[pip]])
+        return self.subset(*[card for card in self if card.pip == p_map[pip]])
 
     def append(self, item):
         if isinstance(item, Card):
@@ -194,7 +190,7 @@ class Deck:
     """
     def __init__(self, cards:list = None, decks:int = 1, shuffled:bool = True):
         if cards is None:
-            self.Cards = [Card(pip, suit) for pip in range(2, 14) for suit in ('S', 'H', 'D', 'C')] * decks
+            self.cards = [Card(pip, suit) for pip in range(2, 15) for suit in ('S', 'H', 'D', 'C')] * decks
         else:
             self.cards = cards * decks
 
@@ -220,9 +216,44 @@ class Deck:
     def __delitem__(self, key):
         del self.cards[key]
 
+    def __str__(self):
+        return r"Deck{" + f"{len(self)} cards" + r"}"
+
+    def __repr__(self):
+        return str(self)
+
+    def reveal(self, n=5):
+        """
+        return a
+        """
+        return r"Deck{" + f"{', '.join([str(card) for card in self.cards[:n]] + ['...'])}" + r"}"
+
+    def append(self, item):
+        if isinstance(item, Card):
+            self.cards.append(item)
+        else:
+            raise TypeError(f'can only append Card (not "{type(item).__name__}") to {type(self).__name__}')
+
     def shuffle(self):
         random.shuffle(self.cards)
 
     def deal(self, *hands, cards=1, burn=False, discards=None):
-        # TODO: Write this method
-        pass
+        if burn:
+            if discards is not None:
+                discards.append(self[0])
+            del self[0]
+        for i in range(cards):
+            for hand in hands:
+                hand.append(self[0])
+                del self[0]
+
+
+if __name__ == "__main__":
+    h1 = Hand()
+    h2 = Hand()
+
+    d = Deck()
+
+    d.deal(h1, h2, cards=2)
+
+    print(h1, h2)
