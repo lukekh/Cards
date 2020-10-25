@@ -18,7 +18,8 @@ class Card(Cards.Card):
         Aces will evaluate to 11 and the Blackjack.Hand class will figure out if they need to be soft.
         :return: int; value
         """
-        if self.pip == 14:
+        # Not certain if I want to keep aces evaluating to 14
+        if self.pip in (1, 14):
             return 11
         else:
             return min(self.pip, 10)
@@ -142,14 +143,11 @@ class Table:
         """
         Playing a round
         """
-        def make_choice(*hands, i=0, dealer, bet, stack):
-            """
-            i is ths current hand acting upon
-            """
-            options = generate_options(hands[hand], bet, stack)
+        def make_choice(cards, dealer, bet, stack):
+            options = generate_options(cards, bet, stack)
             print(f"Dealer shows: {dealer.print_hidden()}")
-            print(f"You're dealt: {', '.join([str(card) for card in hands[0]])}")
-            for
+            print(f"You're dealt: {', '.join([str(card) for card in cards])}")
+            print(f"Current bet: {bet}, Current stack: {stack}")
             print(f"Your options: {', '.join([option for option in options])}\n")
             player_choice = input("Choose option: ").lower()
             if player_choice in options:
@@ -158,21 +156,19 @@ class Table:
                 print("Your option was invalid, please try again.\n")
                 return make_choice(cards, dealer, bet, stack)
 
-        def action(player_choice, shoe, cards, bet, stack):
+        def action(player_choice, shoe, cards, bet):
             """
             refer to generate_options for list of possible options
 
-            current supported options are hit, split, double
-            (stand causes loop to break before this function is called)
+            current supported options are hit and double
+            (stand causes loop to break before this function is called and split is dealt with separately)
             """
             if player_choice == 'hit':
                 shoe.deal(cards)
             elif player_choice == 'double':
-                stack -= bet
-                bet += bet
                 shoe.deal(cards)
 
-        print(f"You have {self.chips} chips.")
+        print(f"You have {self.chips} chip{'s'*(self.chips > 1)}.")
         self.bet = input("How much would you like to bet?: ")
 
         try:
@@ -196,35 +192,54 @@ class Table:
 
         self.chips -= self.bet
 
-        if not self.dealer.hand.blackjack():
-            while self.player.value() <= 21:
-                choice = make_choice(self.player, self.dealer, self.bet, self.chips)
-                action(choice, self.shoe, self.player, self.bet, self.chips)
-                if choice == "stand":
-                    break
+        def play(dealer, shoe, hand, bet, stack, hands):
+            if not dealer.hand.blackjack():
+                while hand.value() <= 21:
+                    choice = make_choice(hand, dealer, bet, stack)
+                    if choice == 'split':
+                        self.chips -= self.bet
+                        h1 = Hand(hand[0])
+                        shoe.deal(h1)
+                        play(dealer, shoe, h1, bet, stack, hands)
+                        h2 = Hand(hand[1])
+                        shoe.deal(h2)
+                        play(dealer, shoe, h2, bet, stack, hands)
+                        return hands
+                    elif choice == 'double':
+                        self.chips -= self.bet
+                        self.bet *= 2
+                    action(choice, shoe, hand, bet)
+                    if choice == "stand":
+                        break
+            hands.append(hand)
+            return hands
+
+        all_hands = play(self.dealer, self.shoe, self.player, self.bet, self.chips, [])
 
         self.dealer.resolve(self)
 
         # Print results
         print(f"Dealer shows: {self.dealer.print_reveal()}")
-        print(f"Player shows: {', '.join([str(card) for card in self.player])}")
-        if self.dealer.hand.blackjack():
-            print(f"Dealer has blackjack. House wins.")
-        if self.player.blackjack():
-            print(f"Player has blackjack and wins {int(self.bet * 1.5)} chips.")
-            self.chips += int(self.bet * 2.5)
-        elif self.player.value() > 21:
-            print("Player busts.")
-        elif self.dealer.value() > 21:
-            print(f"Dealer busts. Player wins {int(self.bet)} chips.")
-            self.chips += 2*self.bet
-        elif self.dealer.value() < self.player.value():
-            print(f"Player wins {int(self.bet)} chips.")
-            self.chips += 2*self.bet
-        elif self.dealer.value() >= self.player.value():
-            print("House wins.")
-        else:
-            print("Something strange has happened.")
+        print(all_hands)
+        for hand in all_hands:
+            print(f"Player shows: {', '.join([str(card) for card in hand])}")
+            if self.dealer.hand.blackjack():
+                print(f"Dealer has blackjack. House wins.")
+            if hand.blackjack():
+                print(f"Player has blackjack and wins {int(self.bet * 1.5)} chip{'s'*(self.chips > 1)}.")
+                self.chips += int(self.bet * 2.5)
+            elif hand.value() > 21:
+                print("Player busts.")
+            elif self.dealer.value() > 21:
+                print(f"Dealer busts. Player wins {int(self.bet)} chip{'s'*(self.chips > 1)}.")
+                self.chips += 2*self.bet
+            elif self.dealer.value() < hand.value():
+                print(f"Player wins {int(self.bet)} chip{'s'*(self.chips > 1)}.")
+                self.chips += 2*self.bet
+            elif self.dealer.value() >= hand.value():
+                print("House wins.")
+            else:
+                print("Something strange has happened.")
 
         self.end_hand()
 
@@ -247,19 +262,18 @@ class Table:
             self.initial_deal()
             self.round()
             if self.chips > 0:
-                play_again = input(f"\nYou have {self.chips} chips. Play again?\n")
+                play_again = input(f"\nYou have {self.chips} chip{'s'*(self.chips > 1)}. Play again?\n")
             else:
                 play_again = 'no'
             if play_again.lower() in ('no', 'n', 'false', 'f'):
                 break
         winnings = self.chips - starting_chips
         if winnings > 0:
-            print(f"Winner winner chicken dinner - you won {winnings} chips.")
+            print(f"Winner winner chicken dinner - you won {winnings} chip{'s'*(self.chips > 1)}.")
         if winnings == 0:
             print("You broke even.")
         else:
-            print(f"The house always wins - you lost {-winnings} chips.")
-
+            print(f"The house always wins - you lost {-winnings} chip{'s'*(self.chips > 1)}.")
 
 
 def generate_options(hand: Hand, bet: int, stack: int) -> dict:
@@ -281,16 +295,16 @@ def generate_options(hand: Hand, bet: int, stack: int) -> dict:
     else:
         options_dict['hit'] = True
 
-    # # Can the player split?
-    # # Check player can double their bet, has only their first two cards and both have the same value
-    # if (bet < stack) and (len(hand) == 2) and (set([card.value() for card in hand]) == 1):
-    #     options_dict['split'] = True
-    # else:
-    #     options_dict['split'] = False
+    # Can the player split?
+    # Check player can double their bet, has only their first two cards and both have the same value
+    if (bet <= stack) and (len(hand) == 2) and (len(set([card.value() for card in hand])) == 1):
+        options_dict['split'] = True
+    else:
+        options_dict['split'] = False
 
     # Can the player double?
     # Check player has enough money left to double their bet
-    if (bet < stack) and (len(hand) == 2):
+    if (bet <= stack) and (len(hand) == 2):
         options_dict['double'] = True
     else:
         options_dict['double'] = False
@@ -301,5 +315,6 @@ def generate_options(hand: Hand, bet: int, stack: int) -> dict:
 
 
 if __name__ == "__main__":
-    t = Table()
-    t.play()
+    while True:
+        t = Table()
+        t.play()
