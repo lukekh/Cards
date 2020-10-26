@@ -20,18 +20,18 @@ p_map = {
 
 
 class Card:
+    """
+    A playing card.
+
+    Aces always mapped to pip==14.
+    Use set_option to change default display options.
+
+    :param pip: str or int; the rank of the card
+    :param suit: str; the suit of the card
+    :param display_pip: str; default="letter"; user setting for default repr and str of pip value
+    :param display_suit: str; default="unicode"; user setting for default repr and str of suit value
+    """
     def __init__(self, pip, suit, display_pip="letter", display_suit="unicode"):
-        """
-        A playing card.
-
-        Aces always mapped to pip==14.
-        Use set_option to change default display options.
-
-        :param pip: str or int; the rank of the card
-        :param suit: str; the suit of the card
-        :param display_pip: str; default="letter"; user setting for default repr and str of pip value
-        :param display_suit: str; default="unicode"; user setting for default repr and str of suit value
-        """
         if str(pip).lower() in p_map:
             self.pip = p_map[str(pip).lower()]
         else:

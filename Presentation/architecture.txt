@@ -1,0 +1,18 @@
+project-git
+├── LICENSE
+├── README.md
+├── .gitignore
+│
+└── project
+    ├── __init__.py 
+    └── some_code.py
+
+Cards
+├── LICENSE
+├── README.md
+├── .gitignore
+│
+├── setup.py
+└── Cards
+    ├── __init__.py 
+    └── core.py
