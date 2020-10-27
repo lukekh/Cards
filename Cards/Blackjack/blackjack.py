@@ -192,7 +192,7 @@ class Table:
 
         self.chips -= self.bet
 
-        def play(dealer, shoe, hand, bet, stack, hands):
+        def play_hand(dealer, shoe, hand, bet, stack, hands):
             if not dealer.hand.blackjack():
                 while hand.value() <= 21:
                     choice = make_choice(hand, dealer, bet, stack)
@@ -200,10 +200,10 @@ class Table:
                         self.chips -= self.bet
                         h1 = Hand(hand[0])
                         shoe.deal(h1)
-                        play(dealer, shoe, h1, bet, stack, hands)
+                        play_hand(dealer, shoe, h1, bet, stack, hands)
                         h2 = Hand(hand[1])
                         shoe.deal(h2)
-                        play(dealer, shoe, h2, bet, stack, hands)
+                        play_hand(dealer, shoe, h2, bet, stack, hands)
                         return hands
                     elif choice == 'double':
                         self.chips -= self.bet
@@ -214,13 +214,12 @@ class Table:
             hands.append(hand)
             return hands
 
-        all_hands = play(self.dealer, self.shoe, self.player, self.bet, self.chips, [])
+        all_hands = play_hand(self.dealer, self.shoe, self.player, self.bet, self.chips, [])
 
         self.dealer.resolve(self)
 
         # Print results
         print(f"Dealer shows: {self.dealer.print_reveal()}")
-        print(all_hands)
         for hand in all_hands:
             print(f"Player shows: {', '.join([str(card) for card in hand])}")
             if self.dealer.hand.blackjack():
@@ -314,7 +313,10 @@ def generate_options(hand: Hand, bet: int, stack: int) -> dict:
     return options
 
 
+def play_blackjack(chips=100):
+    t = Table(chips=chips)
+    t.play()
+
+
 if __name__ == "__main__":
-    while True:
-        t = Table()
-        t.play()
+    play_blackjack()
