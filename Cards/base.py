@@ -131,7 +131,7 @@ class Hand:
         return str(self)
 
     def __str__(self):
-        return str([str(card) for card in self])
+        return "Hand[" + ", ".join([str(card) for card in self]) + "]"
 
     def __len__(self):
         return len(self.cards)
@@ -188,9 +188,11 @@ class Deck:
     :param decks: int; the number of decks
     :param shuffled: bool; whether or not you want the deck shuffled
     """
-    def __init__(self, cards:list = None, decks:int = 1, shuffled:bool = True):
+    def __init__(self, cards:list = None, decks:int = 1, shuffled:bool = True, suit_format="unicode"):
         if cards is None:
-            self.cards = [Card(pip, suit) for pip in range(2, 15) for suit in ('S', 'H', 'D', 'C')] * decks
+            self.cards = [
+                Card(pip, suit, display_suit=suit_format) for pip in range(2, 15) for suit in ('S', 'H', 'D', 'C')
+            ] * decks
         else:
             self.cards = cards * decks
 
@@ -224,7 +226,7 @@ class Deck:
 
     def reveal(self, n=5):
         """
-        return a
+        Show the top n cards if the user wants to see them
         """
         return r"Deck{" + f"{', '.join([str(card) for card in self.cards[:n]] + ['...'])}" + r"}"
 

@@ -59,9 +59,11 @@ class Shoe(Cards.Deck):
     """
     The same as a deck, it just requires blackjack cards
     """
-    def __init__(self, cards:list = None, decks:int = 1, shuffled:bool = True):
+    def __init__(self, cards:list = None, decks:int = 1, shuffled:bool = True, suit_format="unicode"):
         if cards is None:
-            self.cards = [Card(pip, suit) for pip in range(2, 14) for suit in ('S', 'H', 'D', 'C')] * decks
+            self.cards = [
+                Card(pip, suit, display_suit=suit_format) for pip in range(2, 14) for suit in ('S', 'H', 'D', 'C')
+            ] * decks
         else:
             self.cards = cards * decks
 
@@ -116,7 +118,7 @@ class Table:
     :param decks: int; the number of decks
     :param chips: int; the number of chips the player has for betting
     """
-    def __init__(self, decks: int = 6, chips: int = 100):
+    def __init__(self, decks: int = 6, chips: int = 100, suit_format="unicode"):
         self.dealer = Dealer()
         self.shoe = Shoe(decks=decks, shuffled=True)
         self.discards = Shoe(cards=[])
@@ -313,10 +315,10 @@ def generate_options(hand: Hand, bet: int, stack: int) -> dict:
     return options
 
 
-def play_blackjack(chips=100):
-    t = Table(chips=chips)
+def play_blackjack(chips=100, suit_format="unicode"):
+    t = Table(chips=chips, suit_format=suit_format)
     t.play()
 
 
 if __name__ == "__main__":
-    play_blackjack()
+    play_blackjack(suit_format="letter")
