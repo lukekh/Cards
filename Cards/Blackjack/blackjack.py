@@ -271,7 +271,7 @@ class Table:
         winnings = self.chips - starting_chips
         if winnings > 0:
             print(f"Winner winner chicken dinner - you won {winnings} chip{'s'*(self.chips > 1)}.")
-        if winnings == 0:
+        elif winnings == 0:
             print("You broke even.")
         else:
             print(f"The house always wins - you lost {-winnings} chip{'s'*(self.chips > 1)}.")
