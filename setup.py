@@ -4,7 +4,7 @@ with open("README.md", "r") as f:
     long_description = f.read()
 
 setuptools.setup(
-    name="Cards",
+    name="python-playingcards-dev",
     version="0.0.1",
     author="Luke Keating Hughes",
     author_email="luke.keating-hughes@capgemini.com",
