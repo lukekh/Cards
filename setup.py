@@ -5,7 +5,7 @@ with open("README.md", "r") as f:
 
 setuptools.setup(
     name="python-playingcards-dev",
-    version="0.0.3",
+    version="0.0.4",
     author="Luke Keating Hughes",
     author_email="luke.keating-hughes@capgemini.com",
     description="A package to simulate playing cards",
